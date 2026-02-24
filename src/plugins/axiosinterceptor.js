@@ -1,15 +1,17 @@
 import axios from 'axios'
 
 export const api = axios.create({
-  baseURL: '/api',
-  timeout: 5000,
+  baseURL: 'http://localhost:8080', // 백엔드 주소
+  timeout: 60000,
+  withCredentials: true,
 })
 
 const postApi = axios.create({
-  baseURL: '/api', // 서버 기본 주소
+  baseURL: 'http://localhost:8080', // 백엔드 주소
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 })
 
 api.interceptors.request.use(
@@ -33,3 +35,14 @@ api.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+// axios 설정 예시
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    // 백엔드 필터가 'Authorization'을 읽는다면:
+    config.headers.Authorization = `Bearer ${token}`; 
+    // 만약 백엔드가 'ATOKEN'을 직접 읽는다면:
+    // config.headers.ATOKEN = token;
+  }
+  return config;
+});

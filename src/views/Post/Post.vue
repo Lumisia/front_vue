@@ -1,7 +1,9 @@
 <script setup>
 import { reactive, computed, onMounted } from 'vue';
-// Lucide 아이콘 라이브러리 (실제 프로젝트에서는 npm install lucide-vue-next 권장)
-// import { createIcons, LayoutDashboard, PenTool, Files, Settings, Tag, Hash, Type, AlignLeft, Bold, Italic, Image, Link } from 'lucide';
+import { useRouter } from 'vue-router';
+import { boardApi } from '@/axios/post_axios.js';
+
+const router = useRouter();
 
 const post = reactive({
   title: '',
@@ -11,15 +13,34 @@ const post = reactive({
 
 const isValid = computed(() => post.title.trim() && post.content.trim());
 
-const submitPost = () => {
-  alert('🚀 포스트가 세계로 뻗어나가는 중입니다!');
+const submitPost = async () => {
+  if (!isValid.value) return;
+
+  try {
+    // 이제 writerIdx를 수동으로 보내지 않습니다.
+    await boardApi.createPost({
+      title: post.title,
+      content: post.content,
+      category: post.category
+    });
+
+    alert('🚀 포스트가 성공적으로 발행되었습니다!');
+    router.push('/post_list');
+  } catch (error) {
+    if (error.response?.status === 403) {
+      alert('권한이 없습니다. 다시 로그인해주세요.');
+    } else {
+      alert('발행 실패!');
+    }
+  }
 };
 
 const handleCancel = () => {
-  if(confirm('작성 중인 내용이 아깝지 않으신가요?')) console.log('취소됨');
+  if(confirm('작성 중인 내용이 저장되지 않습니다. 정말 취소하시겠나요?')) {
+    router.back(); // 뒤로 가기
+  }
 };
 
-// 아이콘 렌더링 (CDN 방식일 때 필요)
 onMounted(() => {
   if (window.lucide) {
     window.lucide.createIcons();

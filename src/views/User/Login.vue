@@ -78,6 +78,7 @@
 <script setup>
 import { reactive, ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+import  api  from '../../axios/axios';
 
 const router = useRouter();
 const loading = ref(false);
@@ -88,19 +89,31 @@ const loginData = reactive({
 });
 
 const handleLogin = async () => {
+  if (!loginData.email || !loginData.password) {
+    alert('아이디와 비밀번호를 입력해주세요.');
+    return;
+  }
+
   loading.value = true;
   
-  // 실제 로그인 로직 (Axios 등)이 들어갈 자리
   try {
-    console.log('Logging in with:', loginData);
-    // 성공 가정 후 메인으로 이동
-    setTimeout(() => {
-      loading.value = false;
-      router.push('/post_list');
-    }, 1500);
+    const result = await api.userApi(loginData);
+    
+    // 성공 시 로직
+    alert('로그인 성공!');
+    router.push('/post_list');
   } catch (error) {
+    // 💡 아이디가 없거나 비밀번호가 틀렸을 때 (백엔드에서 401이나 404를 줄 때)
+    console.log(error);
+    if (error.response && error.response.status === 401) {
+      alert('아이디 또는 비밀번호가 일치하지 않습니다.');
+    } else if (error.response && error.response.status === 404) {
+      alert('존재하지 않는 아이디입니다.');
+    } else {
+      alert('로그인 중 서버 에러가 발생했습니다.');
+    }
+  } finally {
     loading.value = false;
-    alert('로그인에 실패했습니다.');
   }
 };
 
