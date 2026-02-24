@@ -1,3 +1,51 @@
+<script setup>
+import { reactive, ref, onMounted, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
+import api from '../../axios/axios.js';
+
+const router = useRouter();
+const loading = ref(false);
+
+const signUpData = reactive({
+  email: '',
+  user_id: '',
+  password: ''
+});
+
+const handleSignUp = async () => {
+  loading.value = true;
+  
+  try {
+    console.log('회원가입 시도 데이터:', signUpData);
+    const res = await api.signup(signUpData);
+
+    if (res.data === "성공") {
+      loading.value = false;
+      // 알림 후 5분 타이머가 있는 대기 페이지로 이동
+      alert('회원가입 신청 완료! 5분 안에 이메일 인증을 마쳐주세요.');
+      router.push({
+        path: '/verify',
+        query: { email: signUpData.email }
+      });
+    }
+  } catch (error) {
+    loading.value = false;
+    if (error.response && error.response.status === 500) {
+      alert('이미 사용 중인 정보이거나 서버 오류입니다.');
+    } else {
+      alert('회원가입 처리 중 오류가 발생했습니다.');
+    }
+  }
+};
+
+onMounted(async () => {
+  await nextTick();
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+});
+</script>
+
 <template>
   <div class="min-h-screen w-full bg-[#F8FAFC] flex items-center justify-center p-6 font-sans">
     
@@ -35,7 +83,7 @@
             <div class="relative group">
               <i data-lucide="user" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors"></i>
               <input 
-                v-model="signUpData.username"
+                v-model="signUpData.user_id"
                 type="text" 
                 placeholder="unique_id"
                 class="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent rounded-[20px] font-bold text-slate-700 outline-none focus:bg-white focus:border-indigo-50 transition-all placeholder:text-slate-300"
@@ -86,42 +134,3 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { reactive, ref, onMounted, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-const loading = ref(false);
-
-const signUpData = reactive({
-  email: '',
-  username: '',
-  password: ''
-});
-
-const handleSignUp = async () => {
-  loading.value = true;
-  
-  try {
-    console.log('Signing up with:', signUpData);
-    // 여기에 Axios 회원가입 요청 로직을 추가하세요.
-    
-    setTimeout(() => {
-      loading.value = false;
-      alert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
-      router.push('/login');
-    }, 1500);
-  } catch (error) {
-    loading.value = false;
-    alert('회원가입 처리 중 오류가 발생했습니다.');
-  }
-};
-
-onMounted(async () => {
-  await nextTick();
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
-});
-</script>

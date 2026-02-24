@@ -33,20 +33,38 @@ const router = createRouter({
       component: () => import('../views/User/Login.vue'),
       meta: { title: '로그인', requiresAuth: false, isAuthPage: true},
     },
+    {
+      path: '/verify',
+      name: 'verify',
+      component: () => import('../views/User/Verify.vue'),
+      meta: { title: '이메일 인증', requiresAuth: false, isAuthPage: true},
+    },
+    {
+      path: '/board/detail/:id', // :id 가 변수 역할
+      name: 'PostDetail',
+      component: () => import('../views/Post/Post_View.vue')
+    }
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  console.log('vue에서 링크를 이동할 때 매번 실행되는 함수')
+router.beforeEach((to, from) => {
+  console.log('vue에서 링크를 이동할 때 매번 실행되는 함수');
 
-  document.title = to.meta.title || '하위'
+  // 페이지 타이틀 설정
+  document.title = to.meta.title || '하위';
 
+  // 인증이 필요한 페이지 접근 제어 (주석 해제 시 참고하세요)
   // if (to.meta.requiresAuth) {
-  //   if (localStorage.getItem('USERINFO') === null) {
-  //     next({ name: 'login' })
+  //   const userInfo = localStorage.getItem('USERINFO');
+  //   if (userInfo === null) {
+  //     // ❌ next({ name: 'login' }) 대신
+  //     // ✅ 이동할 경로를 직접 return 합니다.
+  //     return { name: 'login' };
   //   }
   // }
-  next() 
-})
+
+  // ✅ 아무것도 return하지 않으면 원래 가려던 곳(to)으로 자연스럽게 이동합니다.
+  // next() 호출은 이제 필요 없습니다.
+});
 
 export default router
