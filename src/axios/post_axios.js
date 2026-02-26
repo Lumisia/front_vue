@@ -13,8 +13,12 @@ export const boardApi = {
   },
 
   // 게시글 작성 (필요할 경우 미리 만들어둡니다)
-  createPost: async (postData) => {
-    const res = await api.post('/board/save', postData);
+  createPost: async (postData, token) => {
+    const res = await api.post('/board/save', postData, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
     return res.data;
   },
 

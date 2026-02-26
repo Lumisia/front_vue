@@ -17,20 +17,25 @@ const submitPost = async () => {
   if (!isValid.value) return;
 
   try {
-    // 이제 writerIdx를 수동으로 보내지 않습니다.
-    await boardApi.createPost({
+    const token = localStorage.getItem('ATOKEN'); 
+    
+    // 1. 서버가 받을 순수한 게시글 데이터만 구성
+    const postData = {
       title: post.title,
       content: post.content,
       category: post.category
-    });
+    };
+
+    // 2. 데이터와 토큰을 각각 인자로 전달
+    await boardApi.createPost(postData, token);
 
     alert('🚀 포스트가 성공적으로 발행되었습니다!');
     router.push('/post_list');
   } catch (error) {
-    if (error.response?.status === 403) {
-      alert('권한이 없습니다. 다시 로그인해주세요.');
+    if (error.response?.status === 403 || error.response?.status === 401) {
+      alert('인증이 만료되었습니다. 다시 로그인해주세요.');
     } else {
-      alert('발행 실패!');
+      alert('발행 실패: ' + (error.response?.data?.message || '알 수 없는 오류'));
     }
   }
 };
