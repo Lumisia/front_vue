@@ -7,13 +7,15 @@ const route = useRoute();
 // 1. 경로와 표시될 이름 매핑 (메뉴 데이터와 일치시켜주세요)
 const pageNames = {
   '/post_list': '게시글 목록',
+  '/board': '게시글',
   '/post': '게시글 작성',
   '/manage': '게시글 관리'
 };
 
+
 // 2. 현재 경로에 해당하는 이름을 계산 (없을 경우 기본값 'Dashboard')
 const currentTitle = computed(() => {
-  return pageNames[route.path] || '게시글 관리';
+  return route.meta.title || pageNames[route.path] || '알 수 없는 페이지';
 });
 </script>
 

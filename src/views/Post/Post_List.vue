@@ -74,7 +74,7 @@ const handleDelete = (idx) => {
           
           <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
             <div>
-              <h2 class="text-4xl font-black text-slate-900 tracking-tight">게시글 관리</h2>
+              <h2 class="text-4xl font-black text-slate-900 tracking-tight">게시글 목록</h2>
               <p class="text-slate-500 mt-3 text-lg font-medium">총 {{ posts.length }}개의 포스트가 있습니다.</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ const handleDelete = (idx) => {
                       </span>
                     </div>
                   </td>
-                  <td class="py-6 px-4 text-slate-600 font-bold text-sm">{{ post.writer || 'qwer1234' }}</td>
+                  <td class="py-6 px-4 text-slate-600 font-bold text-sm">{{ post.username || 'qwer1234' }}</td>
                   <td class="py-6 px-4">
                     <span :class="categoryStyle(post.category)" class="px-4 py-1.5 rounded-full text-xs font-black tracking-tighter">
                       {{ post.category || '일반' }}
@@ -118,14 +118,14 @@ const handleDelete = (idx) => {
                   </td>
                   <td class="py-6 px-4 text-center">
                     <div class="flex items-center justify-center gap-1.5 text-slate-400 font-bold text-sm">
-                      <i data-lucide="eye" class="w-3.5 h-3.5"></i> {{ (post.viewCount || 0).toLocaleString() }}
+                      <i data-lucide="eye" class="w-3.5 h-3.5"></i> {{ (post.viewcount || 0).toLocaleString() }}
                     </div>
                   </td>
                   <td class="py-6 px-4 text-center text-slate-400 font-bold text-sm">
                     {{ (post.likeCount || 0).toLocaleString() }}
                   </td>
                   <td class="py-6 px-4 text-center text-slate-400 font-bold text-sm">
-                    {{ (post.replyCount || 0).toLocaleString() }}
+                    {{ (post.replySize || 0).toLocaleString() }}
                   </td>
                   <td class="py-6 px-8 text-right">
                     <div class="opacity-0 group-hover:opacity-100 transition-all duration-200 flex justify-end gap-3">

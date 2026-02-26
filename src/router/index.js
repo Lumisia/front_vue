@@ -41,8 +41,9 @@ const router = createRouter({
     },
     {
       path: '/board/detail/:id', // :id 가 변수 역할
-      name: 'PostDetail',
-      component: () => import('../views/Post/Post_View.vue')
+      name: 'board',
+      component: () => import('../views/Post/Post_View.vue'),
+      meta: { title: '게시글', requiresAuth: true, isAuthPage: false},
     }
   ],
 })
