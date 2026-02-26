@@ -10,7 +10,7 @@
       <h1 class="text-3xl font-bold text-slate-800">{{ post.title }}</h1>
       <div class="flex items-center justify-between mt-4 text-slate-500 text-sm">
         <div class="flex items-center gap-4">
-          <span>작성자: {{ post.writer }}</span>
+          <span>작성자: {{ post.email }}</span>
           <span>{{ formatDate(post.regDate) }}</span>
         </div>
         <div class="flex items-center gap-1">
@@ -32,6 +32,47 @@
         수정하기
       </button>
     </div>
+
+    <div class="mt-12">
+      <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+        댓글 <span class="text-blue-600">{{ comments.length }}</span>
+      </h3>
+
+      <div class="bg-slate-50 p-4 rounded-xl mb-8">
+        <textarea 
+          v-model="newComment"
+          placeholder="따뜻한 댓글을 남겨주세요."
+          class="w-full bg-white border border-slate-200 rounded-lg p-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none"
+          rows="3"
+        ></textarea>
+        <div class="flex justify-end mt-2">
+          <button 
+            @click="submitComment"
+            :disabled="!newComment.trim()"
+            class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-slate-300 transition"
+          >
+            댓글 등록
+          </button>
+        </div>
+      </div>
+
+      <div v-for="(comment, index) in comments" :key="index" class="flex gap-4 pb-6 border-b border-slate-100 last:border-0">
+  <div class="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-slate-500 font-bold text-xs">
+    {{ comment.username ? comment.username.substring(0, 2).toUpperCase() : '??' }}
+  </div>
+  
+  <div class="flex-1">
+    <div class="flex items-center justify-between mb-1">
+      <span class="font-bold text-slate-800 text-sm">{{ comment.username }}</span>
+      <span class="text-slate-400 text-xs">{{ comment.createdAt ? formatDate(comment.createdAt) : '방금 전' }}</span>
+    </div>
+    <p class="text-slate-600 text-sm leading-relaxed">
+      {{ comment.content }}
+    </p>
+  </div>
+</div>
+    </div>
   </div>
   
   <div v-else class="text-center py-20 text-slate-500">
@@ -43,9 +84,14 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { boardApi } from '../../axios/post_axios.js';
+import { replyApi } from '../../axios/reply_axios.js';
 
 const route = useRoute();
 const post = ref(null);
+
+// 댓글 관련 상태
+const comments = ref([]);
+const newComment = ref('');
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -65,16 +111,55 @@ const categoryStyle = (type) => {
   return styles[type] || 'bg-slate-50 text-slate-600';
 };
 
+// 게시글 및 댓글 가져오기
 const getDetail = async () => {
   try {
-    const idx = route.params.id; // URL 파라미터에서 ID 추출
+    const idx = route.params.id;
     post.value = await boardApi.getPost(idx);
     
+    // 만약 API에서 댓글을 따로 가져와야 한다면 아래처럼 호출하세요.
+    // comments.value = await boardApi.getComments(idx);
+    
+    // 2. 응답 데이터 안에 있는 replyList를 comments 변수에 할당
+    if (post.value.replyList && Array.isArray(post.value.replyList)) {
+      comments.value = post.value.replyList;
+    } else {
+      comments.value = []; // 댓글이 없을 경우 빈 배열 처리
+    }
+
+
     await nextTick();
     if (window.lucide) window.lucide.createIcons();
   } catch (error) {
-    alert("게시글을 불러오지 못했습니다.");
+    alert("데이터를 불러오지 못했습니다.");
     console.error(error);
+  }
+};
+
+// 댓글 등록 로직
+const submitComment = async () => {
+  if (!newComment.value.trim()) return;
+
+  try {
+    const boardIdx = route.params.id;
+    const token = localStorage.getItem('ATOKEN'); 
+    const commentData = { content: newComment.value };
+
+    const response = await replyApi.createReply(boardIdx, commentData, token);
+
+    if (response) {
+      alert("댓글이 등록되었습니다.");
+      
+      // 1. 입력창 비우기
+      newComment.value = '';
+      
+      // 2. 현재 게시글 정보를 다시 가져와서 목록 갱신 (리다이렉트 효과)
+      await getDetail(); 
+    }
+    
+  } catch (error) {
+    console.error("댓글 등록 에러:", error);
+    alert("댓글 등록 중 오류가 발생했습니다.");
   }
 };
 
